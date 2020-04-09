@@ -3,6 +3,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
 
 COPY ./src/*.sln .
+COPY ./src/Directory.Build.props .
 COPY ./src/MassTransit.Platform/*.csproj ./MassTransit.Platform/
 COPY ./src/MassTransit.Platform.Abstractions/*.csproj ./MassTransit.Platform.Abstractions/
 COPY ./src/MassTransit.Platform.Runtime/*.csproj ./MassTransit.Platform.Runtime/

@@ -2,11 +2,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Platform", "MassTransit.Platform\MassTransit.Platform.csproj", "{CECDC1A7-03DB-48F4-9908-C5D676E17D9A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{A68B3275-9562-472F-A85C-F71B190EE8B2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Other", "Other", "{A68B3275-9562-472F-A85C-F71B190EE8B2}"
 ProjectSection(SolutionItems) = preProject
-	docker-compose.yml = docker-compose.yml
-	Dockerfile = Dockerfile
-	.dockerignore = .dockerignore
+	..\Dockerfile = ..\Dockerfile
+	..\build.sh = ..\build.sh
+	..\README.md = ..\README.md
+	Directory.Build.props = Directory.Build.props
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Platform.Runtime", "MassTransit.Platform.Runtime\MassTransit.Platform.Runtime.csproj", "{20F06FE7-4F70-4692-AC5D-E8B81BFD6031}"

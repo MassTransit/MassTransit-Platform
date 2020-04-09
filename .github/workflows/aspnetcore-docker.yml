@@ -9,7 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-16.04]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Build and test using Docker on Ubuntu
       run: |
         chmod +x build.sh

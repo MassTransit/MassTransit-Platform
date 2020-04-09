@@ -1,0 +1,18 @@
+name: Publish Abstractions NuGet
+on:
+  push:
+    branches:
+      - master
+jobs:
+  publish:
+    name: Publish to NuGet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publish on Version Change
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: src/MassTransit.Platform.Abstractions.csproj
+          VERSION_FILE_PATH: src/Directory.Build.props
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
