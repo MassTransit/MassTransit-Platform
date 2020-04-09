@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit.ActiveMQ" Version="6.2.4" />
+    <PackageReference Include="MassTransit.AmazonSQS" Version="6.2.4" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="6.2.4" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="6.2.4" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="6.2.4" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.13.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MassTransit.Platform.Abstractions\MassTransit.Platform.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
