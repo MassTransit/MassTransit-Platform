@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Platform", "MassTransit.Platform\MassTransit.Platform.csproj", "{CECDC1A7-03DB-48F4-9908-C5D676E17D9A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{A68B3275-9562-472F-A85C-F71B190EE8B2}"
+ProjectSection(SolutionItems) = preProject
+	docker-compose.yml = docker-compose.yml
+	Dockerfile = Dockerfile
+	.dockerignore = .dockerignore
+EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Platform.Runtime", "MassTransit.Platform.Runtime\MassTransit.Platform.Runtime.csproj", "{20F06FE7-4F70-4692-AC5D-E8B81BFD6031}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Platform.Abstractions", "MassTransit.Platform.Abstractions\MassTransit.Platform.Abstractions.csproj", "{689FF481-9650-482F-80D5-5CEA8F113C14}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CECDC1A7-03DB-48F4-9908-C5D676E17D9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CECDC1A7-03DB-48F4-9908-C5D676E17D9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CECDC1A7-03DB-48F4-9908-C5D676E17D9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CECDC1A7-03DB-48F4-9908-C5D676E17D9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20F06FE7-4F70-4692-AC5D-E8B81BFD6031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20F06FE7-4F70-4692-AC5D-E8B81BFD6031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20F06FE7-4F70-4692-AC5D-E8B81BFD6031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20F06FE7-4F70-4692-AC5D-E8B81BFD6031}.Release|Any CPU.Build.0 = Release|Any CPU
+		{689FF481-9650-482F-80D5-5CEA8F113C14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{689FF481-9650-482F-80D5-5CEA8F113C14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{689FF481-9650-482F-80D5-5CEA8F113C14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{689FF481-9650-482F-80D5-5CEA8F113C14}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
