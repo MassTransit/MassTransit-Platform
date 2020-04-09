@@ -12,7 +12,7 @@ jobs:
       - name: Publish on Version Change
         uses: rohith/publish-nuget@v2
         with:
-          PROJECT_FILE_PATH: src/MassTransit.Platform.Abstractions.csproj
+          PROJECT_FILE_PATH: src/MassTransit.Platform.Abstractions/MassTransit.Platform.Abstractions.csproj
           VERSION_FILE_PATH: src/Directory.Build.props
           TAG_COMMIT: false
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
