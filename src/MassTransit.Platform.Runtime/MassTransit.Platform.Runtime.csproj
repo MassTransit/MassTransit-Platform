@@ -10,4 +10,8 @@
     <ProjectReference Include="..\MassTransit.Platform\MassTransit.Platform.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="McMaster.NETCore.Plugins" Version="1.2.0" />
+  </ItemGroup>
+
 </Project>

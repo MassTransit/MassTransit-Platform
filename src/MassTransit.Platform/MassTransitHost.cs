@@ -7,12 +7,20 @@ namespace MassTransit.Platform
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using Serilog;
+    using Serilog.Events;
 
 
     public static class MassTransitHost
     {
         public static IHostBuilder CreateBuilder(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
+
             var builder = new HostBuilder();
 
             builder.UseContentRoot(Directory.GetCurrentDirectory());

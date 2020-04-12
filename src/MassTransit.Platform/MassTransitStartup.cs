@@ -17,7 +17,6 @@
     using Microsoft.Extensions.Options;
     using Prometheus;
     using Serilog;
-    using Serilog.Events;
     using Transports.ActiveMq;
     using Transports.AmazonSqs;
     using Transports.RabbitMq;
@@ -29,13 +28,6 @@
         public MassTransitStartup(IConfiguration configuration)
         {
             Configuration = configuration;
-
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .CreateLogger();
         }
 
         public IConfiguration Configuration { get; }

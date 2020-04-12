@@ -6,29 +6,30 @@ namespace MassTransit.Platform.Runtime
     using System.Linq;
     using System.Reflection;
     using System.Runtime.Loader;
-    using Context;
+    using Abstractions;
+    using McMaster.NETCore.Plugins;
+    using Microsoft.Extensions.DependencyInjection;
+    using Serilog;
 
 
-    public class AssemblyFinder
+    public static class AssemblyFinder
     {
         public delegate bool AssemblyFilter(string filename);
+
+
+        public delegate bool AssemblyTypeFilter(Type type);
 
 
         public delegate void AssemblyLoadFailure(string assemblyName, Exception exception);
 
 
-        public static IEnumerable<Assembly> FindAssemblies(string assemblyPath, AssemblyLoadFailure loadFailure, bool includeExeFiles, AssemblyFilter filter)
+        public static IEnumerable<Assembly> FindAssemblies(string assemblyPath, AssemblyLoadFailure loadFailure, bool isPlugIn, AssemblyFilter filter,
+            AssemblyTypeFilter typeFilter)
         {
-            LogContext.Debug?.Log("Scanning assembly directory: {Path}", assemblyPath);
+            Log.Debug("Scanning assembly directory: {Path}", assemblyPath);
 
             IEnumerable<string> dllFiles = Directory.EnumerateFiles(assemblyPath, "*.dll", SearchOption.AllDirectories).ToList();
             IEnumerable<string> files = dllFiles;
-
-            if (includeExeFiles)
-            {
-                IEnumerable<string> exeFiles = Directory.EnumerateFiles(assemblyPath, "*.exe", SearchOption.AllDirectories).ToList();
-                files = dllFiles.Concat(exeFiles);
-            }
 
             foreach (var file in files)
             {
@@ -38,20 +39,49 @@ namespace MassTransit.Platform.Runtime
 
                 var filterName = Path.GetFileName(file);
                 if (!filter(filterName))
-                {
-                    LogContext.Debug?.Log("Filtered assembly: {File}", file);
-
                     continue;
-                }
 
                 Assembly assembly = null;
                 try
                 {
-                    assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(file);
+                    if (isPlugIn)
+                    {
+                        var loader = PluginLoader.CreateFromAssemblyFile(file,
+                            sharedTypes: new[] {typeof(IPlatformStartup), typeof(IServiceCollection), typeof(ILogger)},
+                            isUnloadable: true, configure: config =>
+                            {
+                                config.PreferSharedTypes = true;
+                            });
+
+                        var defaultAssembly = loader.LoadDefaultAssembly();
+
+                        var hasMatchingType = defaultAssembly.GetExportedTypes().Any(x => typeFilter(x));
+                        if (hasMatchingType)
+                        {
+                            loader.Dispose();
+
+                            loader = PluginLoader.CreateFromAssemblyFile(file,
+                                sharedTypes: new[] {typeof(IPlatformStartup), typeof(IServiceCollection), typeof(ILogger)},
+                                isUnloadable: false, configure: config =>
+                                {
+                                    config.PreferSharedTypes = true;
+                                });
+
+                            assembly = loader.LoadDefaultAssembly();
+                        }
+                        else
+                        {
+                            loader.Dispose();
+                        }
+                    }
+                    else
+                    {
+                        assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(file);
+                    }
                 }
                 catch (BadImageFormatException exception)
                 {
-                    LogContext.Warning?.Log(exception, "Assembly Scan failed: {Name}", name);
+                    loadFailure(file, exception);
 
                     continue;
                 }

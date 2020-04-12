@@ -2,18 +2,16 @@ namespace MassTransit.Platform.Runtime
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Runtime.Loader;
     using System.Threading.Tasks;
-    using GreenPipes.Internals.Extensions;
+    using Serilog;
     using Util;
     using Util.Scanning;
 
 
-    public class RuntimeAssemblyScanner :
-        IAssemblyScanner
+    public class RuntimeAssemblyScanner
     {
         readonly List<Assembly> _assemblies = new List<Assembly>();
         readonly CompositeFilter<string> _assemblyFilter = new CompositeFilter<string>();
@@ -21,44 +19,10 @@ namespace MassTransit.Platform.Runtime
 
         public int Count => _assemblies.Count;
 
-        public string Description { get; set; }
-
-        public void Assembly(Assembly assembly)
+        void Assembly(Assembly assembly)
         {
             if (!_assemblies.Contains(assembly))
                 _assemblies.Add(assembly);
-        }
-
-        public void Assembly(string assemblyName)
-        {
-            var name = new AssemblyName(assemblyName);
-            var asm = AssemblyLoadContext.Default.LoadFromAssemblyName(name);
-            Assembly(asm);
-        }
-
-        public void AssemblyContainingType<T>()
-        {
-            AssemblyContainingType(typeof(T));
-        }
-
-        public void AssemblyContainingType(Type type)
-        {
-            _assemblies.Add(type.GetTypeInfo().Assembly);
-        }
-
-        public void Exclude(Func<Type, bool> exclude)
-        {
-            _filter.Excludes += exclude;
-        }
-
-        public void ExcludeNamespace(string nameSpace)
-        {
-            Exclude(type => type.IsInNamespace(nameSpace));
-        }
-
-        public void ExcludeNamespaceContainingType<T>()
-        {
-            ExcludeNamespace(typeof(T).Namespace);
         }
 
         public void Include(Func<Type, bool> predicate)
@@ -66,72 +30,41 @@ namespace MassTransit.Platform.Runtime
             _filter.Includes += predicate;
         }
 
-        public void IncludeNamespace(string nameSpace)
-        {
-            Include(type => type.IsInNamespace(nameSpace));
-        }
-
-        public void IncludeNamespaceContainingType<T>()
-        {
-            IncludeNamespace(typeof(T).Namespace);
-        }
-
-        public void ExcludeType<T>()
-        {
-            Exclude(type => type == typeof(T));
-        }
-
         public void AssembliesFromApplicationBaseDirectory()
         {
             var assemblyPath = AppDomain.CurrentDomain.BaseDirectory;
 
-            IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(assemblyPath, OnAssemblyLoadFailure, false, _assemblyFilter.Matches);
+            IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(assemblyPath, OnAssemblyLoadFailure, false, _assemblyFilter.Matches, _filter
+                .Matches);
 
             foreach (var assembly in assemblies)
-            {
                 Assembly(assembly);
-            }
-        }
-
-        public void AssembliesAndExecutablesFromPath(string path)
-        {
-            IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(path, OnAssemblyLoadFailure, true, _assemblyFilter.Matches);
-
-            foreach (var assembly in assemblies)
-            {
-                Assembly(assembly);
-            }
         }
 
         public void AssembliesFromPath(string path)
         {
-            IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(path, OnAssemblyLoadFailure, false, _assemblyFilter.Matches);
+            IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(path, OnAssemblyLoadFailure, true, _assemblyFilter.Matches, _filter
+                .Matches);
 
             foreach (var assembly in assemblies)
-            {
                 Assembly(assembly);
-            }
         }
 
-        public void AssembliesAndExecutablesFromPath(string path, Func<Assembly, bool> assemblyFilter)
+        public void ExcludeAssembliesFromBaseDirectory()
         {
-            IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(path, OnAssemblyLoadFailure, true, _assemblyFilter.Matches)
-                .Where(assemblyFilter);
+            var assemblyPath = AppDomain.CurrentDomain.BaseDirectory;
 
-            foreach (var assembly in assemblies)
+            IEnumerable<string> dllFiles = Directory.EnumerateFiles(assemblyPath, "*.dll", SearchOption.AllDirectories).ToList();
+            IEnumerable<string> files = dllFiles;
+
+            foreach (var file in files)
             {
-                Assembly(assembly);
-            }
-        }
+                if (string.IsNullOrWhiteSpace(Path.GetFileNameWithoutExtension(file)))
+                    continue;
 
-        public void AssembliesFromPath(string path, Func<Assembly, bool> assemblyFilter)
-        {
-            IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(path, OnAssemblyLoadFailure, false, _assemblyFilter.Matches)
-                .Where(assemblyFilter);
+                var fileName = Path.GetFileName(file);
 
-            foreach (var assembly in assemblies)
-            {
-                Assembly(assembly);
+                _assemblyFilter.Excludes += name => name.Equals(fileName, StringComparison.OrdinalIgnoreCase);
             }
         }
 
@@ -145,87 +78,14 @@ namespace MassTransit.Platform.Runtime
             }
         }
 
-        public void IncludeFileNameStartsWith(params string[] startsWith)
-        {
-            for (var i = 0; i < startsWith.Length; i++)
-            {
-                var value = startsWith[i];
-
-                _assemblyFilter.Includes += name => name.StartsWith(value, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-
-        public void AssembliesAndExecutablesFromApplicationBaseDirectory()
-        {
-            var assemblyPath = AppDomain.CurrentDomain.BaseDirectory;
-
-            IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(assemblyPath, OnAssemblyLoadFailure, true, _assemblyFilter.Matches);
-
-            foreach (var assembly in assemblies)
-            {
-                Assembly(assembly);
-            }
-        }
-
         static void OnAssemblyLoadFailure(string assemblyName, Exception exception)
         {
-            Console.WriteLine("MassTransit could not load assembly from " + assemblyName);
+            Log.Error(exception, "MassTransit Platform failed to load assembly: {AssemblyName}", assemblyName);
         }
 
         public Task<TypeSet> ScanForTypes()
         {
             return AssemblyTypeCache.FindTypes(_assemblies, _filter.Matches);
-        }
-
-        public bool Contains(string assemblyName)
-        {
-            return _assemblies
-                .Select(assembly => new AssemblyName(assembly.FullName))
-                .Any(aName => aName.Name == assemblyName);
-        }
-
-        public bool HasAssemblies()
-        {
-            return _assemblies.Any();
-        }
-
-        public void TheCallingAssembly()
-        {
-            var callingAssembly = FindTheCallingAssembly();
-
-            if (callingAssembly != null)
-            {
-                Assembly(callingAssembly);
-            }
-            else
-            {
-                throw new ConfigurationException("Could not determine the calling assembly, you may need to explicitly call IAssemblyScanner.Assembly()");
-            }
-        }
-
-        static Assembly FindTheCallingAssembly()
-        {
-            var trace = new StackTrace(false);
-            var thisAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var mtAssembly = typeof(IBus).GetTypeInfo().Assembly;
-
-            Assembly callingAssembly = null;
-            for (var i = 0; i < trace.FrameCount; i++)
-            {
-                var frame = trace.GetFrame(i);
-                var declaringType = frame.GetMethod().DeclaringType;
-                if (declaringType != null)
-                {
-                    var assembly = declaringType.GetTypeInfo().Assembly;
-                    if (assembly != thisAssembly && assembly != mtAssembly)
-                    {
-                        callingAssembly = assembly;
-                        break;
-                    }
-                }
-            }
-
-            return callingAssembly;
         }
     }
 }
