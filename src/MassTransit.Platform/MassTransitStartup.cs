@@ -4,17 +4,21 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Threading.Tasks;
     using Abstractions;
     using Configuration;
     using Definition;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Options;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using Prometheus;
     using Serilog;
     using Transports.ActiveMq;
@@ -57,7 +61,6 @@
             services.Configure<HealthCheckPublisherOptions>(options =>
             {
                 options.Delay = TimeSpan.FromSeconds(2);
-                options.Predicate = check => check.Tags.Contains("ready");
             });
 
             services.AddMassTransitHostedService();
@@ -107,9 +110,12 @@
         {
             var platformOptions = app.ApplicationServices.GetRequiredService<IOptions<PlatformOptions>>().Value;
 
-            app.UseHealthChecks("/health/ready", new HealthCheckOptions {Predicate = check => check.Tags.Contains("ready")});
-
-            app.UseHealthChecks("/health/live");
+            app.UseHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = check => check.Tags.Contains("ready"),
+                ResponseWriter = WriteResponse
+            });
+            app.UseHealthChecks("/health/live", new HealthCheckOptions {ResponseWriter = WriteResponse});
 
             if (!string.IsNullOrWhiteSpace(platformOptions.Prometheus))
             {
@@ -117,6 +123,22 @@
 
                 app.UseMetricServer();
             }
+        }
+
+        static Task WriteResponse(HttpContext context, HealthReport result)
+        {
+            context.Response.ContentType = "application/json";
+
+            var json = new JObject(
+                new JProperty("status", result.Status.ToString()),
+                new JProperty("results", new JObject(result.Entries.Select(pair =>
+                    new JProperty(pair.Key, new JObject(
+                        new JProperty("status", pair.Value.Status.ToString()),
+                        new JProperty("description", pair.Value.Description),
+                        new JProperty("data", new JObject(pair.Value.Data.Select(
+                            p => new JProperty(p.Key, p.Value))))))))));
+
+            return context.Response.WriteAsync(json.ToString(Formatting.Indented));
         }
     }
 }
