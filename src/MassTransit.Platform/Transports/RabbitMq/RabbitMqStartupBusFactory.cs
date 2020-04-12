@@ -3,6 +3,7 @@ namespace MassTransit.Platform.Transports.RabbitMq
     using System;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
+    using Serilog;
 
 
     public class RabbitMqStartupBusFactory :
@@ -26,6 +27,12 @@ namespace MassTransit.Platform.Transports.RabbitMq
                         });
                     }
                 });
+
+                if (!configurator.TryConfigureQuartz(cfg))
+                {
+                    Log.Information("Configuring RabbitMQ Message Scheduler (delayed exchange)");
+                    cfg.UseDelayedExchangeMessageScheduler();
+                }
 
                 configurator.ConfigureBus(cfg, provider);
             });

@@ -6,6 +6,7 @@ namespace MassTransit.Platform.Transports.AmazonSqs
     using AmazonSqsTransport.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
+    using Serilog;
 
 
     public class AmazonSqsStartupBusFactory :
@@ -38,6 +39,12 @@ namespace MassTransit.Platform.Transports.AmazonSqs
                         h.AccessKey(options.AccessKey);
                         h.SecretKey(options.SecretKey);
                     });
+                }
+
+                if (!configurator.TryConfigureQuartz(cfg))
+                {
+                    Log.Information("Configuring Amazon SQS Message Scheduler");
+                    cfg.UseAmazonSqsMessageScheduler();
                 }
 
                 configurator.ConfigureBus(cfg, provider);

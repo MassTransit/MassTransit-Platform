@@ -12,9 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit" Version="6.2.4"/>
-    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="6.2.4"/>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+    <PackageReference Include="MassTransit" Version="6.2.5-develop.2539"/>
+    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="6.2.5-develop.2539"/>
   </ItemGroup>
 
 </Project>

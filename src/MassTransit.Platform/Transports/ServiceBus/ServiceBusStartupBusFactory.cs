@@ -4,6 +4,7 @@ namespace MassTransit.Platform.Transports.ServiceBus
     using Azure.ServiceBus.Core;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
+    using Serilog;
 
 
     public class ServiceBusStartupBusFactory :
@@ -19,6 +20,12 @@ namespace MassTransit.Platform.Transports.ServiceBus
             return Bus.Factory.CreateUsingAzureServiceBus(cfg =>
             {
                 cfg.Host(options.ConnectionString);
+
+                if (!configurator.TryConfigureQuartz(cfg))
+                {
+                    Log.Information("Configuring Azure Service Bus Message Scheduler (enqueue time)");
+                    cfg.UseServiceBusMessageScheduler();
+                }
 
                 configurator.ConfigureBus(cfg, provider);
             });

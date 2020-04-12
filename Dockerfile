@@ -16,22 +16,9 @@ RUN dotnet publish ./MassTransit.Platform.Runtime/MassTransit.Platform.Runtime.c
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
 WORKDIR /runtime
-ARG MT_APP=/app
-ENV MT_APP="${MT_APP}"
-#ARG MT_TRANSPORT=
-#ENV MT_TRANSPORT="${MT_TRANSPORT}"
-#ARG MT_RMQ_HOST=
-#ENV MT_RMQ_HOST="${MT_RMQ_HOST}"
-#ARG MT_RMQ_PORT=
-#ENV MT_RMQ_PORT="${MT_RMQ_PORT}"
-#ARG MT_RMQ_SSL=
-#ENV MT_RMQ_SSL="${MT_RMQ_SSL}"
-#ARG MT_RMQ_VHOST=
-#ENV MT_RMQ_VHOST="${MT_RMQ_VHOST}"
-#ARG MT_RMQ_USERNAME=
-#ENV MT_RMQ_USERNAME="${MT_RMQ_USERNAME}"
-#ARG MT_RMQ_PASSWORD=
-#ENV MT_RMQ_PASSWORD="${MT_RMQ_PASSWORD}"
+
+# application assembly folder
+ENV MT_APP=/app
 COPY --from=build /runtime ./
 EXPOSE 80 443
 RUN mkdir /app

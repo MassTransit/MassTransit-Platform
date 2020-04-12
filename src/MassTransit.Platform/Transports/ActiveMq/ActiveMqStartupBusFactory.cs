@@ -4,6 +4,7 @@ namespace MassTransit.Platform.Transports.ActiveMq
     using ActiveMqTransport;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
+    using Serilog;
 
 
     public class ActiveMqStartupBusFactory :
@@ -25,6 +26,12 @@ namespace MassTransit.Platform.Transports.ActiveMq
                     if (options.Ssl)
                         h.UseSsl();
                 });
+
+                if (!configurator.TryConfigureQuartz(cfg))
+                {
+                    Log.Information("Configuring ActiveMQ Message Scheduler");
+                    cfg.UseActiveMqMessageScheduler();
+                }
 
                 configurator.ConfigureBus(cfg, provider);
             });

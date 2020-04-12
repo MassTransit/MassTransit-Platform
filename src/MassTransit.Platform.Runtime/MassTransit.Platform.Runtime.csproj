@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.Platform\MassTransit.Platform.csproj" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

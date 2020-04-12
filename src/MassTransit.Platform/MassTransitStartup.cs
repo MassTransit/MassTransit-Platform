@@ -15,6 +15,7 @@
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Options;
+    using Prometheus;
     using Serilog;
     using Serilog.Events;
     using Transports.ActiveMq;
@@ -89,7 +90,7 @@
         {
             var platformOptions = provider.GetRequiredService<IOptions<PlatformOptions>>().Value;
 
-            var configurator = new StartupBusConfigurator();
+            var configurator = new StartupBusConfigurator(platformOptions);
 
             switch (platformOptions.Transport.ToLower(CultureInfo.InvariantCulture))
             {
@@ -112,9 +113,18 @@
 
         public void Configure(IApplicationBuilder app)
         {
+            var platformOptions = app.ApplicationServices.GetRequiredService<IOptions<PlatformOptions>>().Value;
+
             app.UseHealthChecks("/health/ready", new HealthCheckOptions {Predicate = check => check.Tags.Contains("ready")});
 
             app.UseHealthChecks("/health/live");
+
+            if (!string.IsNullOrWhiteSpace(platformOptions.Prometheus))
+            {
+                Log.Information("Configuring Prometheus Endpoint: /metrics");
+
+                app.UseMetricServer();
+            }
         }
     }
 }

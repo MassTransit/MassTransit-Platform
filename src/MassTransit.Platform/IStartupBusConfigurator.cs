@@ -7,5 +7,7 @@ namespace MassTransit.Platform
     {
         void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator, IServiceProvider provider)
             where TEndpointConfigurator : IReceiveEndpointConfigurator;
+
+        bool TryConfigureQuartz(IBusFactoryConfigurator configurator);
     }
 }
