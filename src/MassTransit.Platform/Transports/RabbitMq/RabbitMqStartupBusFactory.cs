@@ -1,6 +1,8 @@
 namespace MassTransit.Platform.Transports.RabbitMq
 {
     using System;
+    using System.Net.Security;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Serilog;
@@ -12,6 +14,7 @@ namespace MassTransit.Platform.Transports.RabbitMq
         public IBusControl CreateBus(IServiceProvider provider, IStartupBusConfigurator configurator)
         {
             var options = provider.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+            var sslOptions = provider.GetRequiredService<IOptions<RabbitMqSslOptions>>().Value;
 
             return Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
@@ -20,10 +23,20 @@ namespace MassTransit.Platform.Transports.RabbitMq
                     h.Username(options.User);
                     h.Password(options.Pass);
 
-                    if (options.Ssl)
+                    if (options.UseSsl)
                     {
                         h.UseSsl(s =>
                         {
+                            s.ServerName = sslOptions.ServerName;
+                            s.CertificatePath = sslOptions.CertPath;
+                            s.CertificatePassphrase = sslOptions.CertPassphrase;
+                            s.UseCertificateAsAuthenticationIdentity = sslOptions.CertIdentity;
+
+                            if (sslOptions.Trust)
+                            {
+                                s.AllowPolicyErrors(SslPolicyErrors.RemoteCertificateNameMismatch | SslPolicyErrors.RemoteCertificateChainErrors
+                                    | SslPolicyErrors.RemoteCertificateNotAvailable);
+                            }
                         });
                     }
                 });
@@ -36,6 +49,12 @@ namespace MassTransit.Platform.Transports.RabbitMq
 
                 configurator.ConfigureBus(cfg, provider);
             });
+        }
+
+        public static void Configure(IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<RabbitMqOptions>(configuration.GetSection("RMQ"));
+            services.Configure<RabbitMqSslOptions>(configuration.GetSection("RMQ").GetSection("SSL"));
         }
     }
 }

@@ -15,13 +15,13 @@ namespace MassTransit.Platform.Runtime
             scanner.ExcludeFileNameStartsWith("Microsoft.", "NewId.", "Newtonsoft.", "RabbitMQ.", "sni.dll", "System.", "SQLite.");
             scanner.Include(IsSupportedType);
 
-            if (!string.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrWhiteSpace(path))
+                scanner.AssembliesFromApplicationBaseDirectory();
+            else
             {
                 scanner.ExcludeAssembliesFromBaseDirectory();
                 scanner.AssembliesFromPath(path);
             }
-            else
-                scanner.AssembliesFromApplicationBaseDirectory();
 
             if (scanner.Count == 0)
                 return Enumerable.Empty<AssemblyStartup>();

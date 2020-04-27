@@ -2,6 +2,7 @@ namespace MassTransit.Platform.Transports.ServiceBus
 {
     using System;
     using Azure.ServiceBus.Core;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Serilog;
@@ -29,6 +30,11 @@ namespace MassTransit.Platform.Transports.ServiceBus
 
                 configurator.ConfigureBus(cfg, provider);
             });
+        }
+
+        public static void Configure(IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<ServiceBusOptions>(configuration.GetSection("ASB"));
         }
     }
 }

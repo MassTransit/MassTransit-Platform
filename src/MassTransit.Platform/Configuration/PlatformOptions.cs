@@ -10,9 +10,12 @@ namespace MassTransit.Platform.Configuration
     public class PlatformOptions
     {
         public const string RabbitMq = "rabbitmq";
+        public const string RMQ = "rmq";
         public const string AzureServiceBus = "servicebus";
+        public const string ASB = "asb";
         public const string AmazonSqs = "sqs";
         public const string ActiveMq = "activemq";
+        public const string AMQ = "amq";
 
         public PlatformOptions()
         {
@@ -27,35 +30,34 @@ namespace MassTransit.Platform.Configuration
         public string Prometheus { get; set; }
 
         /// <summary>
-        /// If specified, is the queue name of the endpoint where Quartz is running
+        /// If specified, is the queue name of the endpoint where the message scheduler is running (if using Quartz or HangFire)
         /// </summary>
-        public string Quartz { get; set; }
+        public string Scheduler { get; set; }
 
-        public bool TryGetQuartzEndpointAddress(out Uri address)
+        public bool TryGetSchedulerEndpointAddress(out Uri address)
         {
-            if (!string.IsNullOrWhiteSpace(Quartz))
+            if (!string.IsNullOrWhiteSpace(Scheduler))
             {
-                if (Uri.IsWellFormedUriString(Quartz, UriKind.Absolute))
+                if (Uri.IsWellFormedUriString(Scheduler, UriKind.Absolute))
                 {
-                    address = new Uri(Quartz);
+                    address = new Uri(Scheduler);
                     return true;
                 }
 
-                if (Transport.Equals(RabbitMq, StringComparison.OrdinalIgnoreCase) && RabbitMqEntityNameValidator.Validator.IsValidEntityName(Quartz))
+                switch (Transport.ToLowerInvariant())
                 {
-                    address = new Uri($"exchange:{Quartz}");
-                    return true;
-                }
+                    case RabbitMq when RabbitMqEntityNameValidator.Validator.IsValidEntityName(Scheduler):
+                    case RMQ when RabbitMqEntityNameValidator.Validator.IsValidEntityName(Scheduler):
+                        address = new Uri($"exchange:{Scheduler}");
+                        return true;
 
-                if ((Transport.Equals(ActiveMq, StringComparison.OrdinalIgnoreCase)
-                        && ActiveMqEntityNameValidator.Validator.IsValidEntityName(Quartz))
-                    || (Transport.Equals(AzureServiceBus, StringComparison.OrdinalIgnoreCase)
-                        && ServiceBusEntityNameValidator.Validator.IsValidEntityName(Quartz))
-                    || (Transport.Equals(AmazonSqs, StringComparison.OrdinalIgnoreCase)
-                        && AmazonSqsEntityNameValidator.Validator.IsValidEntityName(Quartz)))
-                {
-                    address = new Uri($"queue:{Quartz}");
-                    return true;
+                    case ActiveMq when ActiveMqEntityNameValidator.Validator.IsValidEntityName(Scheduler):
+                    case AMQ when ActiveMqEntityNameValidator.Validator.IsValidEntityName(Scheduler):
+                    case AzureServiceBus when ServiceBusEntityNameValidator.Validator.IsValidEntityName(Scheduler):
+                    case ASB when ServiceBusEntityNameValidator.Validator.IsValidEntityName(Scheduler):
+                    case AmazonSqs when AmazonSqsEntityNameValidator.Validator.IsValidEntityName(Scheduler):
+                        address = new Uri($"queue:{Scheduler}");
+                        return true;
                 }
             }
 

@@ -4,7 +4,7 @@ namespace MassTransit.Platform.Transports.ActiveMq
     {
         public ActiveMqOptions()
         {
-            Host = MassTransitHost.IsInDocker ? "activemq" : "localhost";
+            Host = MassTransitHost.IsRunningInContainer ? "activemq" : "localhost";
             Port = 61616;
             User = "admin";
             Pass = "admin";
@@ -12,7 +12,7 @@ namespace MassTransit.Platform.Transports.ActiveMq
 
         public string Host { get; set; }
         public ushort Port { get; set; }
-        public bool Ssl { get; set; }
+        public bool UseSsl { get; set; }
         public string User { get; set; }
         public string Pass { get; set; }
     }

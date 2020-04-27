@@ -17,11 +17,12 @@
 
         static IHostBuilder CreateHostBuilder(string[] args)
         {
-            return MassTransitHost.CreateBuilder(args)
+            var appPath = Environment.GetEnvironmentVariable("MT_APP");
+
+            return MassTransitHost.CreateBuilder(appPath, args)
                 .ConfigureWebHostDefaults(builder =>
                 {
-                    var appPath = Environment.GetEnvironmentVariable("MT_APP");
-                    if (Directory.Exists(appPath))
+                    if (!string.IsNullOrWhiteSpace(appPath) && Directory.Exists(appPath))
                     {
                         builder.ConfigureAppConfiguration((context, config) =>
                         {

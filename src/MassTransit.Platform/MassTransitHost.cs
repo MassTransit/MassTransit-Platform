@@ -12,7 +12,7 @@ namespace MassTransit.Platform
 
     public static class MassTransitHost
     {
-        public static IHostBuilder CreateBuilder(string[] args)
+        public static IHostBuilder CreateBuilder(string appPath, string[] args)
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -23,11 +23,19 @@ namespace MassTransit.Platform
 
             var builder = new HostBuilder();
 
-            builder.UseContentRoot(Directory.GetCurrentDirectory());
+            var currentDirectory = Directory.GetCurrentDirectory();
+
+            builder.UseContentRoot(string.IsNullOrWhiteSpace(appPath)
+                ? currentDirectory
+                : appPath);
+
             builder.ConfigureHostConfiguration(config =>
             {
-                config.AddEnvironmentVariables("DOTNET_");
+                var baseSettingsPath = Path.Combine(currentDirectory, "appsettings.json");
+                config.AddJsonFile(baseSettingsPath, true, true);
+
                 config.AddEnvironmentVariables("MT_");
+                config.AddEnvironmentVariables();
 
                 if (args != null)
                     config.AddCommandLine(args);
@@ -37,8 +45,8 @@ namespace MassTransit.Platform
                 {
                     var env = hostingContext.HostingEnvironment;
 
-                    config.AddJsonFile("appsettings.json", true, true);
-                    config.AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
+                    var envSettingsPath = Path.Combine(currentDirectory, $"appsettings.{env.EnvironmentName}.json");
+                    config.AddJsonFile(envSettingsPath, true, true);
 
                     if (env.IsDevelopment() && !string.IsNullOrEmpty(env.ApplicationName))
                     {
@@ -46,11 +54,6 @@ namespace MassTransit.Platform
                         if (appAssembly != null)
                             config.AddUserSecrets(appAssembly, true);
                     }
-
-                    config.AddEnvironmentVariables();
-
-                    if (args != null)
-                        config.AddCommandLine(args);
                 })
                 .UseSerilog()
                 .UseDefaultServiceProvider((context, options) =>
@@ -63,9 +66,9 @@ namespace MassTransit.Platform
             return builder;
         }
 
-        static bool? _isInDocker;
+        static bool? _isRunningInContainer;
 
-        public static bool IsInDocker =>
-            _isInDocker ??= bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), out var inDocker) && inDocker;
+        public static bool IsRunningInContainer =>
+            _isRunningInContainer ??= bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), out var inDocker) && inDocker;
     }
 }

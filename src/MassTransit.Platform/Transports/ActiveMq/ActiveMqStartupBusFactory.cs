@@ -2,6 +2,7 @@ namespace MassTransit.Platform.Transports.ActiveMq
 {
     using System;
     using ActiveMqTransport;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Serilog;
@@ -23,7 +24,7 @@ namespace MassTransit.Platform.Transports.ActiveMq
                     if (!string.IsNullOrWhiteSpace(options.Pass))
                         h.Password(options.Pass);
 
-                    if (options.Ssl)
+                    if (options.UseSsl)
                         h.UseSsl();
                 });
 
@@ -35,6 +36,11 @@ namespace MassTransit.Platform.Transports.ActiveMq
 
                 configurator.ConfigureBus(cfg, provider);
             });
+        }
+
+        public static void Configure(IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<ActiveMqOptions>(configuration.GetSection("AMQ"));
         }
     }
 }

@@ -43,17 +43,21 @@
             services.AddHealthChecks();
 
             services.Configure<PlatformOptions>(Configuration);
-            services.Configure<RabbitMqOptions>(Configuration.GetSection("RabbitMQ"));
+
+            RabbitMqStartupBusFactory.Configure(services, Configuration);
+            ServiceBusStartupBusFactory.Configure(services, Configuration);
+            ActiveMqStartupBusFactory.Configure(services, Configuration);
+            AmazonSqsStartupBusFactory.Configure(services, Configuration);
+
+            var platformStartups = services.BuildServiceProvider().GetService<IEnumerable<IPlatformStartup>>()?.ToList();
 
             ConfigureApplicationInsights(services);
-
-            var hostingConfigurators = services.BuildServiceProvider().GetService<IEnumerable<IPlatformStartup>>()?.ToList();
 
             services.TryAddSingleton(KebabCaseEndpointNameFormatter.Instance);
             services.AddMassTransit(cfg =>
             {
-                foreach (var hostingConfigurator in hostingConfigurators)
-                    hostingConfigurator.ConfigureMassTransit(cfg, services);
+                foreach (var platformStartup in platformStartups)
+                    platformStartup.ConfigureMassTransit(cfg, services);
 
                 cfg.AddBus(CreateBus);
             });
@@ -90,12 +94,15 @@
             switch (platformOptions.Transport.ToLower(CultureInfo.InvariantCulture))
             {
                 case PlatformOptions.RabbitMq:
+                case PlatformOptions.RMQ:
                     return new RabbitMqStartupBusFactory().CreateBus(provider, configurator);
 
                 case PlatformOptions.AzureServiceBus:
+                case PlatformOptions.ASB:
                     return new ServiceBusStartupBusFactory().CreateBus(provider, configurator);
 
                 case PlatformOptions.ActiveMq:
+                case PlatformOptions.AMQ:
                     return new ActiveMqStartupBusFactory().CreateBus(provider, configurator);
 
                 case PlatformOptions.AmazonSqs:
@@ -113,9 +120,9 @@
             app.UseHealthChecks("/health/ready", new HealthCheckOptions
             {
                 Predicate = check => check.Tags.Contains("ready"),
-                ResponseWriter = WriteResponse
+                ResponseWriter = HealthCheckResponseWriter
             });
-            app.UseHealthChecks("/health/live", new HealthCheckOptions {ResponseWriter = WriteResponse});
+            app.UseHealthChecks("/health/live", new HealthCheckOptions {ResponseWriter = HealthCheckResponseWriter});
 
             if (!string.IsNullOrWhiteSpace(platformOptions.Prometheus))
             {
@@ -125,7 +132,7 @@
             }
         }
 
-        static Task WriteResponse(HttpContext context, HealthReport result)
+        static Task HealthCheckResponseWriter(HttpContext context, HealthReport result)
         {
             context.Response.ContentType = "application/json";
 

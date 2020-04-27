@@ -42,7 +42,7 @@ namespace MassTransit.Platform
 
         public bool TryConfigureQuartz(IBusFactoryConfigurator configurator)
         {
-            if (_platformOptions.TryGetQuartzEndpointAddress(out var address))
+            if (_platformOptions.TryGetSchedulerEndpointAddress(out var address))
             {
                 Log.Information("Configuring Quartz Message Scheduler (endpoint: {QuartzAddress}", address);
                 configurator.UseMessageScheduler(address);

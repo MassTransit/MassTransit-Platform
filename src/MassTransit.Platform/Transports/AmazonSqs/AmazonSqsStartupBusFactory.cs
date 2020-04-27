@@ -4,6 +4,7 @@ namespace MassTransit.Platform.Transports.AmazonSqs
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using AmazonSqsTransport.Configuration;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Serilog;
@@ -49,6 +50,11 @@ namespace MassTransit.Platform.Transports.AmazonSqs
 
                 configurator.ConfigureBus(cfg, provider);
             });
+        }
+
+        public static void Configure(IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<AmazonSqsOptions>(configuration.GetSection("SQS"));
         }
     }
 }
