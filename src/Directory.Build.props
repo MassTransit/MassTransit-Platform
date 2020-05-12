@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <Product>MassTransit</Product>
-    <Version>6.2.5</Version>
+    <Version>6.3.1</Version>
     <Copyright>Copyright 2007-2020 Chris Patterson</Copyright>
     <Authors>Chris Patterson</Authors>
     <LangVersion>8</LangVersion>

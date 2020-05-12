@@ -5,6 +5,6 @@ namespace MassTransit.Platform
 
     public interface IStartupBusFactory
     {
-        IBusControl CreateBus(IServiceProvider provider, IStartupBusConfigurator configurator);
+        IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator);
     }
 }

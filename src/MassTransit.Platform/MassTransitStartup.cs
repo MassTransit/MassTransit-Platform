@@ -85,9 +85,9 @@
             });
         }
 
-        IBusControl CreateBus(IServiceProvider provider)
+        IBusControl CreateBus(IRegistrationContext<IServiceProvider> context)
         {
-            var platformOptions = provider.GetRequiredService<IOptions<PlatformOptions>>().Value;
+            var platformOptions = context.Container.GetRequiredService<IOptions<PlatformOptions>>().Value;
 
             var configurator = new StartupBusConfigurator(platformOptions);
 
@@ -95,18 +95,18 @@
             {
                 case PlatformOptions.RabbitMq:
                 case PlatformOptions.RMQ:
-                    return new RabbitMqStartupBusFactory().CreateBus(provider, configurator);
+                    return new RabbitMqStartupBusFactory().CreateBus(context, configurator);
 
                 case PlatformOptions.AzureServiceBus:
                 case PlatformOptions.ASB:
-                    return new ServiceBusStartupBusFactory().CreateBus(provider, configurator);
+                    return new ServiceBusStartupBusFactory().CreateBus(context, configurator);
 
                 case PlatformOptions.ActiveMq:
                 case PlatformOptions.AMQ:
-                    return new ActiveMqStartupBusFactory().CreateBus(provider, configurator);
+                    return new ActiveMqStartupBusFactory().CreateBus(context, configurator);
 
                 case PlatformOptions.AmazonSqs:
-                    return new AmazonSqsStartupBusFactory().CreateBus(provider, configurator);
+                    return new AmazonSqsStartupBusFactory().CreateBus(context, configurator);
 
                 default:
                     throw new ConfigurationException($"Unknown transport type: {platformOptions.Transport}");

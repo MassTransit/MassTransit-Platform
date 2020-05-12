@@ -11,9 +11,9 @@ namespace MassTransit.Platform.Transports.ActiveMq
     public class ActiveMqStartupBusFactory :
         IStartupBusFactory
     {
-        public IBusControl CreateBus(IServiceProvider provider, IStartupBusConfigurator configurator)
+        public IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator)
         {
-            var options = provider.GetRequiredService<IOptions<ActiveMqOptions>>().Value;
+            var options = context.Container.GetRequiredService<IOptions<ActiveMqOptions>>().Value;
 
             return Bus.Factory.CreateUsingActiveMq(cfg =>
             {
@@ -34,7 +34,7 @@ namespace MassTransit.Platform.Transports.ActiveMq
                     cfg.UseActiveMqMessageScheduler();
                 }
 
-                configurator.ConfigureBus(cfg, provider);
+                configurator.ConfigureBus(cfg, context);
             });
         }
 

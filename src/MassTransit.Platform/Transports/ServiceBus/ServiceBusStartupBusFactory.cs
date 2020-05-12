@@ -11,9 +11,9 @@ namespace MassTransit.Platform.Transports.ServiceBus
     public class ServiceBusStartupBusFactory :
         IStartupBusFactory
     {
-        public IBusControl CreateBus(IServiceProvider provider, IStartupBusConfigurator configurator)
+        public IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator)
         {
-            var options = provider.GetRequiredService<IOptions<ServiceBusOptions>>().Value;
+            var options = context.Container.GetRequiredService<IOptions<ServiceBusOptions>>().Value;
 
             if (string.IsNullOrWhiteSpace(options.ConnectionString))
                 throw new ConfigurationException("The Azure Service Bus ConnectionString must not be empty.");
@@ -28,7 +28,7 @@ namespace MassTransit.Platform.Transports.ServiceBus
                     cfg.UseServiceBusMessageScheduler();
                 }
 
-                configurator.ConfigureBus(cfg, provider);
+                configurator.ConfigureBus(cfg, context);
             });
         }
 

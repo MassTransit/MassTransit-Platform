@@ -11,10 +11,10 @@ namespace MassTransit.Platform.Transports.RabbitMq
     public class RabbitMqStartupBusFactory :
         IStartupBusFactory
     {
-        public IBusControl CreateBus(IServiceProvider provider, IStartupBusConfigurator configurator)
+        public IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator)
         {
-            var options = provider.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
-            var sslOptions = provider.GetRequiredService<IOptions<RabbitMqSslOptions>>().Value;
+            var options = context.Container.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+            var sslOptions = context.Container.GetRequiredService<IOptions<RabbitMqSslOptions>>().Value;
 
             return Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
@@ -47,7 +47,7 @@ namespace MassTransit.Platform.Transports.RabbitMq
                     cfg.UseDelayedExchangeMessageScheduler();
                 }
 
-                configurator.ConfigureBus(cfg, provider);
+                configurator.ConfigureBus(cfg, context);
             });
         }
 

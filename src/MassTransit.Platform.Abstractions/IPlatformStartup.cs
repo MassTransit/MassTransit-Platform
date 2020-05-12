@@ -21,8 +21,8 @@ namespace MassTransit.Platform.Abstractions
         /// Configure the bus, using the supplied configurators
         /// </summary>
         /// <param name="configurator">Can be used to specify additional bus configuration</param>
-        /// <param name="provider">The service provider, can be used to resolve dependencies</param>
-        void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator, IServiceProvider provider)
+        /// <param name="context">The service provider, can be used to resolve dependencies</param>
+        void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator, IRegistrationContext<IServiceProvider> context)
             where TEndpointConfigurator : IReceiveEndpointConfigurator;
     }
 }

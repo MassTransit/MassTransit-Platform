@@ -13,9 +13,9 @@ namespace MassTransit.Platform.Transports.AmazonSqs
     public class AmazonSqsStartupBusFactory :
         IStartupBusFactory
     {
-        public IBusControl CreateBus(IServiceProvider provider, IStartupBusConfigurator configurator)
+        public IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator)
         {
-            var options = provider.GetRequiredService<IOptions<AmazonSqsOptions>>().Value;
+            var options = context.Container.GetRequiredService<IOptions<AmazonSqsOptions>>().Value;
 
             return Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
@@ -48,7 +48,7 @@ namespace MassTransit.Platform.Transports.AmazonSqs
                     cfg.UseAmazonSqsMessageScheduler();
                 }
 
-                configurator.ConfigureBus(cfg, provider);
+                configurator.ConfigureBus(cfg, context);
             });
         }
 

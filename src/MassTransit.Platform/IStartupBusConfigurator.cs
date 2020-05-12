@@ -5,7 +5,7 @@ namespace MassTransit.Platform
 
     public interface IStartupBusConfigurator
     {
-        void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator, IServiceProvider provider)
+        void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator, IRegistrationContext<IServiceProvider> context)
             where TEndpointConfigurator : IReceiveEndpointConfigurator;
 
         bool TryConfigureQuartz(IBusFactoryConfigurator configurator);

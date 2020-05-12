@@ -20,10 +20,11 @@ namespace MassTransit.Platform
             _platformOptions = platformOptions;
         }
 
-        public void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator, IServiceProvider provider)
+        public void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator,
+            IRegistrationContext<IServiceProvider> context)
             where TEndpointConfigurator : IReceiveEndpointConfigurator
         {
-            configurator.UseHealthCheck(provider);
+            configurator.UseHealthCheck(context);
 
             if (!string.IsNullOrWhiteSpace(_platformOptions.Prometheus))
             {
@@ -32,12 +33,12 @@ namespace MassTransit.Platform
                 configurator.UsePrometheusMetrics(serviceName: _platformOptions.Prometheus);
             }
 
-            var hostingConfigurators = provider.GetService<IEnumerable<IPlatformStartup>>()?.ToList();
+            var hostingConfigurators = context.Container.GetService<IEnumerable<IPlatformStartup>>()?.ToList();
 
             foreach (var hostingConfigurator in hostingConfigurators)
-                hostingConfigurator.ConfigureBus(configurator, provider);
+                hostingConfigurator.ConfigureBus(configurator, context);
 
-            configurator.ConfigureEndpoints(provider);
+            configurator.ConfigureEndpoints(context);
         }
 
         public bool TryConfigureQuartz(IBusFactoryConfigurator configurator)
