@@ -1,7 +1,7 @@
 namespace MassTransit.Platform.Transports.RabbitMq
 {
-    using System;
     using System.Net.Security;
+    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -11,13 +11,16 @@ namespace MassTransit.Platform.Transports.RabbitMq
     public class RabbitMqStartupBusFactory :
         IStartupBusFactory
     {
-        public IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator)
+        public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
-            var options = context.Container.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
-            var sslOptions = context.Container.GetRequiredService<IOptions<RabbitMqSslOptions>>().Value;
+            if (!configurator.HasSchedulerEndpoint)
+                busConfigurator.AddRabbitMqMessageScheduler();
 
-            return Bus.Factory.CreateUsingRabbitMq(cfg =>
+            busConfigurator.UsingRabbitMq((context, cfg) =>
             {
+                var options = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+                var sslOptions = context.GetRequiredService<IOptions<RabbitMqSslOptions>>().Value;
+
                 cfg.Host(options.Host, options.Port, options.VHost, h =>
                 {
                     h.Username(options.User);

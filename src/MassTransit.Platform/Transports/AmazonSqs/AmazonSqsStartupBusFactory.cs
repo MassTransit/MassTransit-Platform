@@ -3,7 +3,7 @@ namespace MassTransit.Platform.Transports.AmazonSqs
     using System;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using AmazonSqsTransport.Configuration;
+    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -13,12 +13,14 @@ namespace MassTransit.Platform.Transports.AmazonSqs
     public class AmazonSqsStartupBusFactory :
         IStartupBusFactory
     {
-        public IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator)
+        public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
-            var options = context.Container.GetRequiredService<IOptions<AmazonSqsOptions>>().Value;
+            if (!configurator.HasSchedulerEndpoint)
+                busConfigurator.AddAmazonSqsMessageScheduler();
 
-            return Bus.Factory.CreateUsingAmazonSqs(cfg =>
+            busConfigurator.UsingAmazonSqs((context, cfg) =>
             {
+                var options = context.GetRequiredService<IOptions<AmazonSqsOptions>>().Value;
                 if (string.IsNullOrWhiteSpace(options.Region))
                 {
                     cfg.Host(new UriBuilder("amazonsqs://docker.localhost:4576") {Path = options.Scope}.Uri, h =>

@@ -1,10 +1,10 @@
 namespace MassTransit.Platform
 {
-    using System;
+    using ExtensionsDependencyInjectionIntegration;
 
 
     public interface IStartupBusFactory
     {
-        IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator);
+        void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator);
     }
 }

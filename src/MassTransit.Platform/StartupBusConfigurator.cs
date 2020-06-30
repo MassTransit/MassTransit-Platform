@@ -5,7 +5,6 @@ namespace MassTransit.Platform
     using System.Linq;
     using Abstractions;
     using Configuration;
-    using Microsoft.Extensions.DependencyInjection;
     using PrometheusIntegration;
     using Serilog;
 
@@ -14,14 +13,18 @@ namespace MassTransit.Platform
         IStartupBusConfigurator
     {
         readonly PlatformOptions _platformOptions;
+        readonly Uri _schedulerEndpointAddress;
 
         public StartupBusConfigurator(PlatformOptions platformOptions)
         {
             _platformOptions = platformOptions;
+
+            _platformOptions.TryGetSchedulerEndpointAddress(out _schedulerEndpointAddress);
         }
 
-        public void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator,
-            IRegistrationContext<IServiceProvider> context)
+        public bool HasSchedulerEndpoint => _schedulerEndpointAddress != null;
+
+        public void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator, IBusRegistrationContext context)
             where TEndpointConfigurator : IReceiveEndpointConfigurator
         {
             configurator.UseHealthCheck(context);
@@ -33,7 +36,7 @@ namespace MassTransit.Platform
                 configurator.UsePrometheusMetrics(serviceName: _platformOptions.Prometheus);
             }
 
-            var hostingConfigurators = context.Container.GetService<IEnumerable<IPlatformStartup>>()?.ToList();
+            List<IPlatformStartup> hostingConfigurators = context.GetService<IEnumerable<IPlatformStartup>>()?.ToList();
 
             foreach (var hostingConfigurator in hostingConfigurators)
                 hostingConfigurator.ConfigureBus(configurator, context);
@@ -43,14 +46,12 @@ namespace MassTransit.Platform
 
         public bool TryConfigureQuartz(IBusFactoryConfigurator configurator)
         {
-            if (_platformOptions.TryGetSchedulerEndpointAddress(out var address))
-            {
-                Log.Information("Configuring Quartz Message Scheduler (endpoint: {QuartzAddress}", address);
-                configurator.UseMessageScheduler(address);
-                return true;
-            }
+            if (_schedulerEndpointAddress == null)
+                return false;
 
-            return false;
+            Log.Information("Configuring Quartz Message Scheduler (endpoint: {QuartzAddress}", _schedulerEndpointAddress);
+            configurator.UseMessageScheduler(_schedulerEndpointAddress);
+            return true;
         }
     }
 }

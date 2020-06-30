@@ -8,6 +8,7 @@
     using Abstractions;
     using Configuration;
     using Definition;
+    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -49,7 +50,9 @@
             ActiveMqStartupBusFactory.Configure(services, Configuration);
             AmazonSqsStartupBusFactory.Configure(services, Configuration);
 
-            var platformStartups = services.BuildServiceProvider().GetService<IEnumerable<IPlatformStartup>>()?.ToList();
+            var configurationServiceProvider = services.BuildServiceProvider();
+
+            List<IPlatformStartup> platformStartups = configurationServiceProvider.GetService<IEnumerable<IPlatformStartup>>()?.ToList();
 
             ConfigureApplicationInsights(services);
 
@@ -59,7 +62,7 @@
                 foreach (var platformStartup in platformStartups)
                     platformStartup.ConfigureMassTransit(cfg, services);
 
-                cfg.AddBus(CreateBus);
+                CreateBus(cfg, configurationServiceProvider);
             });
 
             services.Configure<HealthCheckPublisherOptions>(options =>
@@ -85,9 +88,9 @@
             });
         }
 
-        IBusControl CreateBus(IRegistrationContext<IServiceProvider> context)
+        void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IServiceProvider provider)
         {
-            var platformOptions = context.Container.GetRequiredService<IOptions<PlatformOptions>>().Value;
+            var platformOptions = provider.GetRequiredService<IOptions<PlatformOptions>>().Value;
 
             var configurator = new StartupBusConfigurator(platformOptions);
 
@@ -95,18 +98,22 @@
             {
                 case PlatformOptions.RabbitMq:
                 case PlatformOptions.RMQ:
-                    return new RabbitMqStartupBusFactory().CreateBus(context, configurator);
+                    new RabbitMqStartupBusFactory().CreateBus(busConfigurator, configurator);
+                    break;
 
                 case PlatformOptions.AzureServiceBus:
                 case PlatformOptions.ASB:
-                    return new ServiceBusStartupBusFactory().CreateBus(context, configurator);
+                    new ServiceBusStartupBusFactory().CreateBus(busConfigurator, configurator);
+                    break;
 
                 case PlatformOptions.ActiveMq:
                 case PlatformOptions.AMQ:
-                    return new ActiveMqStartupBusFactory().CreateBus(context, configurator);
+                    new ActiveMqStartupBusFactory().CreateBus(busConfigurator, configurator);
+                    break;
 
                 case PlatformOptions.AmazonSqs:
-                    return new AmazonSqsStartupBusFactory().CreateBus(context, configurator);
+                    new AmazonSqsStartupBusFactory().CreateBus(busConfigurator, configurator);
+                    break;
 
                 default:
                     throw new ConfigurationException($"Unknown transport type: {platformOptions.Transport}");

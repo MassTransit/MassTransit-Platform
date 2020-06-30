@@ -1,7 +1,6 @@
 namespace MassTransit.Platform.Transports.ServiceBus
 {
-    using System;
-    using Azure.ServiceBus.Core;
+    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -11,15 +10,17 @@ namespace MassTransit.Platform.Transports.ServiceBus
     public class ServiceBusStartupBusFactory :
         IStartupBusFactory
     {
-        public IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator)
+        public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
-            var options = context.Container.GetRequiredService<IOptions<ServiceBusOptions>>().Value;
+            if (!configurator.HasSchedulerEndpoint)
+                busConfigurator.AddServiceBusMessageScheduler();
 
-            if (string.IsNullOrWhiteSpace(options.ConnectionString))
-                throw new ConfigurationException("The Azure Service Bus ConnectionString must not be empty.");
-
-            return Bus.Factory.CreateUsingAzureServiceBus(cfg =>
+            busConfigurator.UsingAzureServiceBus((context, cfg) =>
             {
+                var options = context.GetRequiredService<IOptions<ServiceBusOptions>>().Value;
+                if (string.IsNullOrWhiteSpace(options.ConnectionString))
+                    throw new ConfigurationException("The Azure Service Bus ConnectionString must not be empty.");
+
                 cfg.Host(options.ConnectionString);
 
                 if (!configurator.TryConfigureQuartz(cfg))

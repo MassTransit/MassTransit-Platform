@@ -1,7 +1,7 @@
 namespace MassTransit.Platform.Transports.ActiveMq
 {
-    using System;
     using ActiveMqTransport;
+    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -11,12 +11,15 @@ namespace MassTransit.Platform.Transports.ActiveMq
     public class ActiveMqStartupBusFactory :
         IStartupBusFactory
     {
-        public IBusControl CreateBus(IRegistrationContext<IServiceProvider> context, IStartupBusConfigurator configurator)
+        public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
-            var options = context.Container.GetRequiredService<IOptions<ActiveMqOptions>>().Value;
+            if (!configurator.HasSchedulerEndpoint)
+                busConfigurator.AddActiveMqMessageScheduler();
 
-            return Bus.Factory.CreateUsingActiveMq(cfg =>
+            busConfigurator.UsingActiveMq((context, cfg) =>
             {
+                var options = context.GetRequiredService<IOptions<ActiveMqOptions>>().Value;
+
                 cfg.Host(options.Host, options.Port, h =>
                 {
                     if (!string.IsNullOrWhiteSpace(options.User))
