@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Publish on Version Change
-        uses: rohith/publish-nuget@v2
+        uses: brandedoutcast/publish-nuget@v2.5.3
         with:
           PROJECT_FILE_PATH: src/MassTransit.Platform.Abstractions/MassTransit.Platform.Abstractions.csproj
           VERSION_FILE_PATH: src/Directory.Build.props
