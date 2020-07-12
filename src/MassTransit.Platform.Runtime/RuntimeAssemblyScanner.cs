@@ -54,6 +54,8 @@ namespace MassTransit.Platform.Runtime
         {
             var assemblyPath = AppDomain.CurrentDomain.BaseDirectory;
 
+            Log.Information("Excluding assemblies from {BaseDirectory}", assemblyPath);
+
             IEnumerable<string> dllFiles = Directory.EnumerateFiles(assemblyPath, "*.dll", SearchOption.AllDirectories).ToList();
             IEnumerable<string> files = dllFiles;
 

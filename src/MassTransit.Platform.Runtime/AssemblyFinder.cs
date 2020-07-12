@@ -31,7 +31,7 @@ namespace MassTransit.Platform.Runtime
         public static IEnumerable<Assembly> FindAssemblies(string assemblyPath, AssemblyLoadFailure loadFailure, bool isPlugIn, AssemblyFilter filter,
             AssemblyTypeFilter typeFilter)
         {
-            Log.Debug("Scanning assembly directory: {Path}", assemblyPath);
+            Log.Information("Scanning assembly directory: {Path}", assemblyPath);
 
             IEnumerable<string> dllFiles = Directory.EnumerateFiles(assemblyPath, "*.dll", SearchOption.AllDirectories).ToList();
             IEnumerable<string> files = dllFiles;
@@ -97,6 +97,7 @@ namespace MassTransit.Platform.Runtime
                 .SetMainAssemblyPath(assemblyPath)
                 .PreferDefaultLoadContext(true)
                 .AddDependencyContext(depsPath)
+                .AddProbingPath(Path.GetDirectoryName(assemblyPath))
                 .PreferDefaultLoadContextAssembly(typeof(IPlatformStartup).Assembly.GetName())
                 .PreferDefaultLoadContextAssembly(typeof(IServiceCollection).Assembly.GetName())
                 .PreferDefaultLoadContextAssembly(typeof(IServiceCollectionBusConfigurator).Assembly.GetName())
