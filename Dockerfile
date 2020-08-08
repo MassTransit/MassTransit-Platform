@@ -15,12 +15,13 @@ COPY ./src/MassTransit.Platform.Runtime ./MassTransit.Platform.Runtime
 RUN dotnet publish ./MassTransit.Platform.Runtime/MassTransit.Platform.Runtime.csproj -c Release -o /runtime -r linux-musl-x64 --no-restore
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
-WORKDIR /runtime
+RUN apk add --no-cache icu-libs && \
+    mkdir /app
 
-# application assembly folder
-ENV MT_APP=/app
+WORKDIR /runtime
 COPY --from=build /runtime ./
+ENV MT_APP=/app
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 EXPOSE 80 443
-RUN mkdir /app
 
 ENTRYPOINT ["dotnet", "/runtime/MassTransit.Platform.Runtime.dll"]
