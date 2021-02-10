@@ -1,5 +1,5 @@
 # https://hub.docker.com/_/microsoft-dotnet-core
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 
 COPY ./src/*.sln .
@@ -14,7 +14,7 @@ COPY ./src/MassTransit.Platform.Abstractions ./MassTransit.Platform.Abstractions
 COPY ./src/MassTransit.Platform.Runtime ./MassTransit.Platform.Runtime
 RUN dotnet publish ./MassTransit.Platform.Runtime/MassTransit.Platform.Runtime.csproj -c Release -o /runtime -r linux-musl-x64 --no-restore
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
 RUN apk add --no-cache icu-libs && \
     mkdir /app
 
