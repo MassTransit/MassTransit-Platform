@@ -16,7 +16,7 @@ namespace MassTransit.Platform.Transports.AmazonSqs
         public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
             if (!configurator.HasSchedulerEndpoint)
-                busConfigurator.AddAmazonSqsMessageScheduler();
+                busConfigurator.AddDelayedMessageScheduler();
 
             busConfigurator.UsingAmazonSqs((context, cfg) =>
             {
@@ -47,7 +47,7 @@ namespace MassTransit.Platform.Transports.AmazonSqs
                 if (!configurator.TryConfigureQuartz(cfg))
                 {
                     Log.Information("Configuring Amazon SQS Message Scheduler");
-                    cfg.UseAmazonSqsMessageScheduler();
+                    cfg.UseDelayedMessageScheduler();
                 }
 
                 configurator.ConfigureBus(cfg, context);

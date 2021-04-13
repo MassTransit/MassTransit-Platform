@@ -14,7 +14,7 @@ namespace MassTransit.Platform.Transports.RabbitMq
         public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
             if (!configurator.HasSchedulerEndpoint)
-                busConfigurator.AddRabbitMqMessageScheduler();
+                busConfigurator.AddDelayedMessageScheduler();
 
             busConfigurator.UsingRabbitMq((context, cfg) =>
             {
@@ -47,7 +47,7 @@ namespace MassTransit.Platform.Transports.RabbitMq
                 if (!configurator.TryConfigureQuartz(cfg))
                 {
                     Log.Information("Configuring RabbitMQ Message Scheduler (delayed exchange)");
-                    cfg.UseDelayedExchangeMessageScheduler();
+                    cfg.UseDelayedMessageScheduler();
                 }
 
                 configurator.ConfigureBus(cfg, context);

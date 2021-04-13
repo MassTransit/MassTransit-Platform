@@ -14,7 +14,7 @@ namespace MassTransit.Platform.Transports.ActiveMq
         public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
             if (!configurator.HasSchedulerEndpoint)
-                busConfigurator.AddActiveMqMessageScheduler();
+                busConfigurator.AddDelayedMessageScheduler();
 
             busConfigurator.UsingActiveMq((context, cfg) =>
             {
@@ -34,7 +34,7 @@ namespace MassTransit.Platform.Transports.ActiveMq
                 if (!configurator.TryConfigureQuartz(cfg))
                 {
                     Log.Information("Configuring ActiveMQ Message Scheduler");
-                    cfg.UseActiveMqMessageScheduler();
+                    cfg.UseDelayedMessageScheduler();
                 }
 
                 configurator.ConfigureBus(cfg, context);
