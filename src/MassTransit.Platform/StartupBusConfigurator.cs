@@ -27,8 +27,6 @@ namespace MassTransit.Platform
         public void ConfigureBus<TEndpointConfigurator>(IBusFactoryConfigurator<TEndpointConfigurator> configurator, IBusRegistrationContext context)
             where TEndpointConfigurator : IReceiveEndpointConfigurator
         {
-            configurator.UseHealthCheck(context);
-
             if (!string.IsNullOrWhiteSpace(_platformOptions.Prometheus))
             {
                 Log.Information("Configuring Prometheus Metrics: {ServiceName}", _platformOptions.Prometheus);
