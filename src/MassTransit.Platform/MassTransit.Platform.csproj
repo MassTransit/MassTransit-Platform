@@ -12,12 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit.ActiveMQ" Version="7.2.0" />
-    <PackageReference Include="MassTransit.AmazonSQS" Version="7.2.0" />
-    <PackageReference Include="MassTransit.AspNetCore" Version="7.2.0" />
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="7.2.0" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="7.2.0" />
-    <PackageReference Include="MassTransit.Prometheus" Version="7.2.0" />
+    <PackageReference Include="MassTransit.ActiveMQ" Version="7.2.1" />
+    <PackageReference Include="MassTransit.AmazonSQS" Version="7.2.1" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.2.1" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="7.2.1" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="7.2.1" />
+    <PackageReference Include="MassTransit.Prometheus" Version="7.2.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.16.0" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
