@@ -31,7 +31,18 @@ namespace MassTransit.Platform
             {
                 Log.Information("Configuring Prometheus Metrics: {ServiceName}", _platformOptions.Prometheus);
 
-                configurator.UsePrometheusMetrics(serviceName: _platformOptions.Prometheus);
+                if (!string.IsNullOrWhiteSpace(_platformOptions.PrometheusHistogramBuckets))
+                {
+                    var histogramBuckets = _platformOptions.PrometheusHistogramBuckets.Split(",").Select(t => Convert.ToDouble(t)).ToArray();
+
+                    configurator.UsePrometheusMetrics(
+                        options => options.HistogramBuckets = histogramBuckets,
+                        _platformOptions.Prometheus);
+                }
+                else
+                {
+                    configurator.UsePrometheusMetrics(serviceName: _platformOptions.Prometheus);
+                }
             }
 
             List<IPlatformStartup> hostingConfigurators = context.GetService<IEnumerable<IPlatformStartup>>()?.ToList();

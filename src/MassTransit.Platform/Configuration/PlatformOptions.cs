@@ -30,6 +30,11 @@ namespace MassTransit.Platform.Configuration
         public string Prometheus { get; set; }
 
         /// <summary>
+        /// If specified, use provided histogram buckets
+        /// </summary>
+        public string PrometheusHistogramBuckets { get; set; }
+
+        /// <summary>
         /// If specified, is the queue name of the endpoint where the message scheduler is running (if using Quartz or HangFire)
         /// </summary>
         public string Scheduler { get; set; }
