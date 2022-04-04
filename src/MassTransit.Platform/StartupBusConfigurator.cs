@@ -5,7 +5,7 @@ namespace MassTransit.Platform
     using System.Linq;
     using Abstractions;
     using Configuration;
-    using PrometheusIntegration;
+    using Microsoft.Extensions.DependencyInjection;
     using Serilog;
 
 

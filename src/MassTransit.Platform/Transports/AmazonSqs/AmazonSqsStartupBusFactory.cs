@@ -3,7 +3,6 @@ namespace MassTransit.Platform.Transports.AmazonSqs
     using System;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -13,7 +12,7 @@ namespace MassTransit.Platform.Transports.AmazonSqs
     public class AmazonSqsStartupBusFactory :
         IStartupBusFactory
     {
-        public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
+        public void CreateBus(IBusRegistrationConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
             if (!configurator.HasSchedulerEndpoint)
                 busConfigurator.AddDelayedMessageScheduler();

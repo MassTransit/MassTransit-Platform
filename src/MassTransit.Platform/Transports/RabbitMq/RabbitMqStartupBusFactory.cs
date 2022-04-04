@@ -1,7 +1,6 @@
 namespace MassTransit.Platform.Transports.RabbitMq
 {
     using System.Net.Security;
-    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -11,7 +10,7 @@ namespace MassTransit.Platform.Transports.RabbitMq
     public class RabbitMqStartupBusFactory :
         IStartupBusFactory
     {
-        public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
+        public void CreateBus(IBusRegistrationConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
             if (!configurator.HasSchedulerEndpoint)
                 busConfigurator.AddDelayedMessageScheduler();

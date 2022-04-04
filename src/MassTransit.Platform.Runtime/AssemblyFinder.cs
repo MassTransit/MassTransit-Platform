@@ -7,13 +7,8 @@ namespace MassTransit.Platform.Runtime
     using System.Reflection;
     using System.Runtime.Loader;
     using Abstractions;
-    using ActiveMqTransport;
-    using AmazonSqsTransport;
-    using Azure.ServiceBus.Core;
-    using ExtensionsDependencyInjectionIntegration;
     using McMaster.NETCore.Plugins.Loader;
     using Microsoft.Extensions.DependencyInjection;
-    using RabbitMqTransport;
     using Serilog;
 
 
@@ -100,7 +95,7 @@ namespace MassTransit.Platform.Runtime
                 .AddProbingPath(Path.GetDirectoryName(assemblyPath))
                 .PreferDefaultLoadContextAssembly(typeof(IPlatformStartup).Assembly.GetName())
                 .PreferDefaultLoadContextAssembly(typeof(IServiceCollection).Assembly.GetName())
-                .PreferDefaultLoadContextAssembly(typeof(IServiceCollectionBusConfigurator).Assembly.GetName())
+                .PreferDefaultLoadContextAssembly(typeof(IBusRegistrationConfigurator).Assembly.GetName())
                 .PreferDefaultLoadContextAssembly(typeof(ILogger).Assembly.GetName())
                 .PreferDefaultLoadContextAssembly(typeof(IBus).Assembly.GetName())
                 .PreferDefaultLoadContextAssembly(typeof(IRabbitMqBusFactoryConfigurator).Assembly.GetName())

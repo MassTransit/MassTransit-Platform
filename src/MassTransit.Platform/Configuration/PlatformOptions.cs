@@ -3,7 +3,7 @@ namespace MassTransit.Platform.Configuration
     using System;
     using ActiveMqTransport.Topology;
     using AmazonSqsTransport.Topology;
-    using Azure.ServiceBus.Core.Topology;
+    using AzureServiceBusTransport.Topology;
     using RabbitMqTransport.Topology;
 
 

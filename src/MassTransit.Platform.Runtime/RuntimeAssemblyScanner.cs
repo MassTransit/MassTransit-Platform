@@ -6,9 +6,9 @@ namespace MassTransit.Platform.Runtime
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using MassTransit.Configuration;
     using Serilog;
     using Util;
-    using Util.Scanning;
 
 
     public class RuntimeAssemblyScanner
