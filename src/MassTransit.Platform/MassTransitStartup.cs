@@ -7,8 +7,6 @@
     using System.Threading.Tasks;
     using Abstractions;
     using Configuration;
-    using Definition;
-    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -69,8 +67,6 @@
             {
                 options.Delay = TimeSpan.FromSeconds(2);
             });
-
-            services.AddMassTransitHostedService();
         }
 
         void ConfigureApplicationInsights(IServiceCollection services)
@@ -88,7 +84,7 @@
             });
         }
 
-        void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IServiceProvider provider)
+        void CreateBus(IBusRegistrationConfigurator busConfigurator, IServiceProvider provider)
         {
             var platformOptions = provider.GetRequiredService<IOptions<PlatformOptions>>().Value;
 

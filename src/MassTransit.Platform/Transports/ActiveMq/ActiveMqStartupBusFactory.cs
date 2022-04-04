@@ -1,7 +1,5 @@
 namespace MassTransit.Platform.Transports.ActiveMq
 {
-    using ActiveMqTransport;
-    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -11,7 +9,7 @@ namespace MassTransit.Platform.Transports.ActiveMq
     public class ActiveMqStartupBusFactory :
         IStartupBusFactory
     {
-        public void CreateBus(IServiceCollectionBusConfigurator busConfigurator, IStartupBusConfigurator configurator)
+        public void CreateBus(IBusRegistrationConfigurator busConfigurator, IStartupBusConfigurator configurator)
         {
             if (!configurator.HasSchedulerEndpoint)
                 busConfigurator.AddDelayedMessageScheduler();
